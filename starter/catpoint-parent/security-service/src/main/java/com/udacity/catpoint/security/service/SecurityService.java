@@ -40,7 +40,6 @@ public class SecurityService {
     /**
      * * Sets the current arming status for the system. Changing the arming status
      * may update both the alarm status.
-     * @param armingStatus
      */
     public void setArmingStatus(ArmingStatus armingStatus) {
         if (catDetect && armingStatus == ARMED_HOME) {
@@ -74,7 +73,6 @@ public class SecurityService {
 
     /**
      * Register the StatusListener for alarm system updates from within the SecurityService.
-     * @param statusListener
      */
     public void addStatusListener(StatusListener statusListener) {
         statusListeners.add(statusListener);
@@ -86,7 +84,6 @@ public class SecurityService {
 
     /**
      * Change the alarm status of the system and notify all listeners.
-     * @param status
      */
     public void setAlarmStatus(AlarmStatus status) {
         securityRepository.setAlarmStatus(status);
@@ -118,37 +115,33 @@ public class SecurityService {
 
     /**
      * Change the activation status for the specified sensor and update alarm status if necessary.
-     * @param sensor
-     * @param active
      */
     public void changeSensorActivationStatus(Sensor sensor, Boolean active) {
         AlarmStatus alarmStatus = securityRepository.getAlarmStatus();
-
-        if (alarmStatus != ALARM) {
-            if (active) handleSensorActivated();
-            else if (sensor.getActive()) handleSensorDeactivated();
-        }
-
-        sensor.setActive(active);
-        securityRepository.updateSensor(sensor);
-    }
-
-    public void changeSensorActivationStatus(Sensor sensor) {
-        AlarmStatus alarmStatus = this.getAlarmStatus();
         ArmingStatus armingStatus = this.getArmingStatus();
-
-        if (alarmStatus == PENDING_ALARM && !sensor.getActive()) {
-            handleSensorDeactivated();
-        } else if (alarmStatus == ALARM && armingStatus == DISARMED) {
-            handleSensorDeactivated();
+        if (active == null) {
+            if (alarmStatus == PENDING_ALARM && !sensor.getActive()) {
+                handleSensorDeactivated();
+            } else if (alarmStatus == ALARM && armingStatus == DISARMED) {
+                handleSensorDeactivated();
+            }
+        } else {
+            if (alarmStatus != ALARM) {
+                if (active) {
+                    handleSensorActivated();
+                } else if (sensor.getActive()) {
+                    handleSensorDeactivated();
+                }
+            }
+            sensor.setActive(active);
         }
+
         securityRepository.updateSensor(sensor);
     }
 
     /**
      * Send an image to the SecurityService for processing. The securityService will use its provided
      * ImageService to analyze the image for cats and update the alarm status accordingly.
-     * @param currentCameraImage
      */
     public void processImage(BufferedImage currentCameraImage) {
         catDetected(imageService.imageContainsCat(currentCameraImage, 50.0f));

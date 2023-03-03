@@ -75,7 +75,7 @@ public class SecurityServiceTest {
     void allSensorInactive_alarmStatusPending_alarmStatusNoAlarm() {
         when(securityRepository.getAlarmStatus()).thenReturn(AlarmStatus.PENDING_ALARM);
         sensor.setActive(Boolean.FALSE);
-        service.changeSensorActivationStatus(sensor);
+        service.changeSensorActivationStatus(sensor, null);
 
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.NO_ALARM);
     }
@@ -124,7 +124,7 @@ public class SecurityServiceTest {
     void imageServiceIdentifiesImageContainCat_systemArmedHome_alarmStatusAlarm() {
         when(securityRepository.getArmingStatus()).thenReturn(ArmingStatus.ARMED_HOME);
         when(imageService.imageContainsCat(any(), ArgumentMatchers.anyFloat())).thenReturn(true);
-        service.processImage(new BufferedImage(128, 128, BufferedImage.TYPE_INT_RGB));
+        service.processImage(mock(BufferedImage.class));
 
         verify(securityRepository, times(1)).setAlarmStatus(AlarmStatus.ALARM);
     }
